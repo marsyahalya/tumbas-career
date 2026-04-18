@@ -29,15 +29,7 @@ class RiderProfile extends Model
         'birth_date' => 'date',
         'contract_start_date' => 'date',
         'contract_end_date' => 'date',
-    ];
-
-    const STATUS_LABELS = [
-        'submitted'             => 'Submit',
-        'document_verification' => 'Verifikasi',
-        'interview'             => 'Wawancara',
-        'final_approval'        => 'Final Approval',
-        'accepted'              => 'Diterima',
-        'rejected'              => 'Ditolak',
+        'application_status' => \App\Enums\ApplicationStatus::class,
     ];
 
     /**
@@ -45,20 +37,9 @@ class RiderProfile extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return self::STATUS_LABELS[$this->application_status] ?? $this->application_status;
+        return $this->application_status->label();
     }
 
-    /**
-     * Status yang tersedia
-     */
-    const STATUSES = [
-        'submitted',
-        'document_verification',
-        'interview',
-        'final_approval',
-        'accepted',
-        'rejected',
-    ];
 
     /**
      * Relasi: 1 rider_profile dimiliki 1 user

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Http\Requests\UpdateRiderStatusRequest;
 use App\Models\RiderProfile;
 use Illuminate\Http\RedirectResponse;
@@ -11,7 +12,7 @@ use Illuminate\View\View;
 class AdminController extends Controller
 {
     /**
-     * Tampilkan daftar semua rider beserta status terbaru
+     * Tampilkan daftar semua rider beserta status terbaru.
      */
     public function index(): View
     {
@@ -23,7 +24,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Tampilkan detail lengkap seorang rider
+     * Tampilkan detail lengkap seorang rider.
      */
     public function show(RiderProfile $riderProfile): View
     {
@@ -33,25 +34,26 @@ class AdminController extends Controller
     }
 
     /**
-     * Update status rider oleh admin
+     * Update status pendaftaran rider oleh admin.
      */
     public function updateStatus(UpdateRiderStatusRequest $request, RiderProfile $riderProfile): RedirectResponse
     {
         $data = $request->validated();
 
-        // Logic: Jika baru saja di-set 'accepted', isi otomatis contract_start_date ke hari ini (jika belum ada)
-        if ($data['application_status'] === 'accepted' && $riderProfile->application_status !== 'accepted') {
+        // Jika status diubah ke 'accepted', set tanggal mulai kontrak jika belum ada.
+        if ($data['application_status'] === ApplicationStatus::ACCEPTED->value && 
+            $riderProfile->application_status !== ApplicationStatus::ACCEPTED) {
             $data['contract_start_date'] ??= now();
         }
 
         $riderProfile->update($data);
 
         return redirect()->route('admin.riders.show', $riderProfile)
-            ->with('success', "Data rider '{$riderProfile->full_name}' berhasil diperbarui ke status " . $riderProfile->status_label);
+            ->with('success', "Data rider '{$riderProfile->full_name}' berhasil diperbarui.");
     }
 
     /**
-     * Download CV Rider
+     * Download CV Rider.
      */
     public function downloadCv(RiderProfile $riderProfile)
     {
@@ -63,5 +65,4 @@ class AdminController extends Controller
 
         return Storage::disk('public')->response($cvPath);
     }
-
 }

@@ -2,24 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Http\Requests\StoreRiderProfileRequest;
 use App\Http\Requests\UpdateRiderProfileRequest;
-use App\Models\Document;
-use App\Models\Experience;
 use App\Models\RiderProfile;
+use App\Services\RiderService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class RiderController extends Controller
 {
+    private RiderService $riderService;
+
+    public function __construct(RiderService $riderService)
+    {
+        $this->riderService = $riderService;
+    }
+
     /**
-     * Tampilkan form pendaftaran rider
+     * Tampilkan form pendaftaran rider.
      */
     public function create(): View|RedirectResponse
     {
-        // Jika sudah punya profil, redirect ke halaman edit
         if (auth()->user()->riderProfile) {
             return redirect()->route('rider.edit');
         }
@@ -30,48 +34,18 @@ class RiderController extends Controller
     }
 
     /**
-     * Simpan data pendaftaran rider baru (semua tabel sekaligus)
+     * Simpan data pendaftaran rider baru menggunakan RiderService.
      */
     public function store(StoreRiderProfileRequest $request): RedirectResponse
     {
-        DB::transaction(function () use ($request) {
-            $user = $request->user();
-
-            // 1. Simpan Rider Profile
-            $profile = $user->riderProfile()->create(
-                $request->safe()->only([
-                    'full_name', 'phone_number', 'birth_date', 'gender',
-                    'address', 'city', 'selected_area_id'
-                ]) + ['application_status' => 'submitted']
-            );
-
-            // 2. Simpan Experiences (maks 3)
-            if ($request->has('experiences')) {
-                $experiences = collect($request->experiences)
-                    ->filter(fn($exp) => !empty($exp['company_name']))
-                    ->map(fn($exp) => [
-                        'company_name' => $exp['company_name'],
-                        'position'     => $exp['position'] ?? null,
-                        'start_date'   => $exp['start_date'],
-                        'end_date'     => $exp['end_date'] ?? null,
-                    ]);
-
-                $profile->experiences()->createMany($experiences->toArray());
-            }
-
-            // 3. Upload & simpan Dokumen
-            $profile->document()->create([
-                'cv_path'    => $request->file('cv')->store('documents/cv', 'public'),
-                'photo_path' => $request->file('photo')->store('documents/photo', 'public'),
-            ]);
-        });
+        $this->riderService->register($request->user(), $request->all());
 
         return redirect()->route('rider.show')
             ->with('success', 'Pendaftaran berhasil dikirim! Silakan tunggu proses verifikasi.');
     }
 
     /**
-     * Tampilkan detail profil rider yang sedang login
+     * Tampilkan detail profil rider yang sedang login.
      */
     public function show(): View
     {
@@ -84,7 +58,7 @@ class RiderController extends Controller
     }
 
     /**
-     * Tampilkan form edit profil rider
+     * Tampilkan form edit profil rider.
      */
     public function edit(): View
     {
@@ -100,64 +74,18 @@ class RiderController extends Controller
     }
 
     /**
-     * Update data profil rider sebelum submit final
+     * Update data profil rider menggunakan RiderService.
      */
     public function update(UpdateRiderProfileRequest $request): RedirectResponse
     {
-        $profile = $request->user()->riderProfile;
-
-        DB::transaction(function () use ($request, $profile) {
-            // 1. Update Rider Profile
-            $profile->update($request->safe()->only([
-                'full_name', 'phone_number', 'birth_date', 'gender',
-                'address', 'city', 'selected_area_id',
-            ]));
-
-            // 2. Update Experiences: hapus semua lalu buat ulang
-            if ($request->has('experiences')) {
-                $profile->experiences()->delete();
-                
-                $experiences = collect($request->experiences)
-                    ->filter(fn($exp) => !empty($exp['company_name']))
-                    ->map(fn($exp) => [
-                        'company_name' => $exp['company_name'],
-                        'position'     => $exp['position'] ?? null,
-                        'start_date'   => $exp['start_date'],
-                        'end_date'     => $exp['end_date'] ?? null,
-                    ]);
-
-                $profile->experiences()->createMany($experiences->toArray());
-            }
-
-            // 3. Update Dokumen (jika ada file baru)
-            $document = $profile->document;
-
-            foreach (['cv', 'photo'] as $fileType) {
-                if ($request->hasFile($fileType)) {
-                    $pathField = $fileType . '_path';
-                    
-                    // Delete old file
-                    if ($document && $document->$pathField) {
-                        Storage::disk('public')->delete($document->$pathField);
-                    }
-
-                    $newPath = $request->file($fileType)->store("documents/$fileType", 'public');
-                    
-                    if ($document) {
-                        $document->update([$pathField => $newPath]);
-                    } else {
-                        $profile->document()->create([$pathField => $newPath]);
-                    }
-                }
-            }
-        });
+        $this->riderService->updateProfile($request->user()->riderProfile, $request->all());
 
         return redirect()->route('rider.show')
             ->with('success', 'Data berhasil diperbarui.');
     }
 
     /**
-     * Re-apply for alumni riders
+     * Ajukan pendaftaran ulang untuk eks-rider (alumni).
      */
     public function reapply(): RedirectResponse
     {
@@ -165,7 +93,7 @@ class RiderController extends Controller
 
         if ($profile?->auto_employment_status === 'alumni') {
             $profile->update([
-                'application_status'  => 'submitted',
+                'application_status'  => ApplicationStatus::SUBMITTED,
                 'contract_start_date' => null,
                 'contract_end_date'   => null,
             ]);
@@ -176,5 +104,4 @@ class RiderController extends Controller
 
         return redirect()->route('rider.dashboard');
     }
-
 }

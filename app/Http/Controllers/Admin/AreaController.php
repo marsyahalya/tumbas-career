@@ -10,7 +10,15 @@ use Illuminate\View\View;
 
 class AreaController extends Controller
 {
-
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check() || !auth()->user()->isAdmin()) {
+                abort(403);
+            }
+            return $next($request);
+        });
+    }
 
     public function index(): View
     {
@@ -21,12 +29,13 @@ class AreaController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string', 'max:500'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:500'],
         ]);
 
         Area::create($request->only([
-            'name', 'description'
+            'name',
+            'description'
         ]) + ['is_active' => true]);
 
         return redirect()->route('admin.areas.index')
@@ -36,13 +45,15 @@ class AreaController extends Controller
     public function update(Request $request, Area $area): RedirectResponse
     {
         $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string', 'max:500'],
-            'is_active'    => ['boolean'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:500'],
+            'is_active' => ['boolean'],
         ]);
 
         $area->update($request->only([
-            'name', 'description', 'is_active'
+            'name',
+            'description',
+            'is_active'
         ]));
 
         return redirect()->route('admin.areas.index')
