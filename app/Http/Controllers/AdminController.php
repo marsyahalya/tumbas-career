@@ -10,28 +10,11 @@ use Illuminate\View\View;
 
 class AdminController extends Controller
 {
-    public function __construct()
-    {
-        // Pastikan hanya admin yang bisa akses semua method
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check() || !auth()->user()->isAdmin()) {
-                abort(403, 'Akses ditolak. Hanya admin yang diperbolehkan.');
-            }
-            return $next($request);
-        });
-    }
-
     /**
      * Tampilkan daftar semua rider beserta status terbaru
      */
     public function index(): View
     {
-        // Sync alumni status (simple cleanup)
-        RiderProfile::where('application_status', 'accepted')
-            ->whereNotNull('contract_end_date')
-            ->where('contract_end_date', '<', today())
-            ->update(['application_status' => 'accepted']); // Still accepted, but the compute logic will show alumni.
-
         $riders = RiderProfile::with(['user', 'selectedArea'])
             ->latest()
             ->paginate(15);
@@ -51,21 +34,14 @@ class AdminController extends Controller
 
     /**
      * Update status rider oleh admin
-     *
-     * Alur status yang valid:
-     * submitted → document_verification → interview → final_approval → accepted
-     *                                                                 → rejected (kapan saja)
      */
     public function updateStatus(UpdateRiderStatusRequest $request, RiderProfile $riderProfile): RedirectResponse
     {
-        $oldStatus = $riderProfile->application_status;
         $data = $request->validated();
 
         // Logic: Jika baru saja di-set 'accepted', isi otomatis contract_start_date ke hari ini (jika belum ada)
-        if ($data['application_status'] === 'accepted' && $oldStatus !== 'accepted') {
-            if (!$riderProfile->contract_start_date) {
-                $data['contract_start_date'] = now();
-            }
+        if ($data['application_status'] === 'accepted' && $riderProfile->application_status !== 'accepted') {
+            $data['contract_start_date'] ??= now();
         }
 
         $riderProfile->update($data);
@@ -79,12 +55,13 @@ class AdminController extends Controller
      */
     public function downloadCv(RiderProfile $riderProfile)
     {
-        $document = $riderProfile->document;
+        $cvPath = $riderProfile->document?->cv_path;
 
-        if (!$document || !$document->cv_path || !Storage::disk('public')->exists($document->cv_path)) {
+        if (!$cvPath || !Storage::disk('public')->exists($cvPath)) {
             return back()->with('error', 'File CV tidak tersedia atau gagal diunduh.');
         }
 
-        return Storage::disk('public')->response($document->cv_path);
+        return Storage::disk('public')->response($cvPath);
     }
+
 }

@@ -10,15 +10,7 @@ use Illuminate\View\View;
 
 class AreaController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check() || !auth()->user()->isAdmin()) {
-                abort(403);
-            }
-            return $next($request);
-        });
-    }
+
 
     public function index(): View
     {
