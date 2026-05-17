@@ -143,8 +143,16 @@ class RiderService
     {
         $sendEmail = $this->shouldSendEmailNotification($riderProfile, $data);
 
-        if ($sendEmail && $data['application_status'] === 'wawancara') {
-            $data['interview_sent_at'] = now();
+        if ($data['application_status'] === 'wawancara') {
+            if ($sendEmail) {
+                $data['interview_sent_at'] = now();
+                $data['interview_attendance'] = null;
+                $data['interview_attendance_count'] = 0;
+                $data['interview_attendance_updated_at'] = null;
+                $data['interview_decline_reason'] = null;
+                $data['interview_reschedule_date'] = null;
+                $data['interview_decline_details'] = null;
+            }
         }
 
         $contractData = $this->prepareContractData($riderProfile, $data);
@@ -215,7 +223,7 @@ class RiderService
         return $contractData;
     }
 
-    public function updateAttendance(RiderProfile $profile, string $attendance): bool
+    public function updateAttendance(RiderProfile $profile, string $attendance, array $declineData = []): bool
     {
         if ($profile->application_status !== 'wawancara') {
             return false;
@@ -225,10 +233,22 @@ class RiderService
             throw new \Exception('Batas maksimal perubahan konfirmasi (3x) telah tercapai.');
         }
 
-        return $profile->update([
+        $data = [
             'interview_attendance' => $attendance,
             'interview_attendance_count' => $profile->interview_attendance_count + 1,
             'interview_attendance_updated_at' => now(),
-        ]);
+        ];
+
+        if ($attendance === 'tidak_hadir') {
+            $data['interview_decline_reason'] = $declineData['reason'] ?? null;
+            $data['interview_reschedule_date'] = $declineData['reschedule_date'] ?? null;
+            $data['interview_decline_details'] = $declineData['details'] ?? null;
+        } else {
+            $data['interview_decline_reason'] = null;
+            $data['interview_reschedule_date'] = null;
+            $data['interview_decline_details'] = null;
+        }
+
+        return $profile->update($data);
     }
 }

@@ -21,7 +21,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 relative z-10">
             <div>
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                    <x-ui.application-logo class="w-20 h-20 fill-current text-gray-500" />
                 </a>
                 <p class="text-center font-semibold text-gray-400 text-sm mt-1 uppercase tracking-widest">
                     Career Riders
@@ -36,3 +36,4 @@
         </div>
     </body>
 </html>
+

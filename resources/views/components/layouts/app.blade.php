@@ -14,7 +14,7 @@
     </head>
     <body class="font-sans antialiased text-gray-800">
         <div class="min-h-screen bg-stone-50 relative overflow-hidden">
-            @include('layouts.navigation')
+            @include('components.layouts.navigation')
 
             @if (isset($header))
                 <header class="bg-white shadow-sm border-b border-stone-100 relative z-10">
@@ -49,3 +49,4 @@
         </div>
     </body>
 </html>
+

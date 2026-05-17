@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.app>
     <x-slot name="header">
         <div class="flex items-center gap-4">
             <a href="{{ route('admin.dashboard') }}" class="text-gray-400 hover:text-tumbas transition-colors">
@@ -131,4 +131,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
+

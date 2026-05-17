@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.app>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Progres Pendaftaran Rider') }}
@@ -38,10 +38,10 @@
 
                     <!-- Right: Area Card & Reapply Button -->
                     <div class="flex flex-col items-end gap-4 w-full md:w-auto">
-                        <div class="w-full md:w-64 flex items-center gap-4 py-3 px-5 bg-tumbas-50 border border-tumbas-100 rounded-2xl shadow-sm">
+                        <div class="w-full md:w-64 flex items-center gap-4 py-3 px-5 bg-red-50 border border-red-100 rounded-2xl shadow-sm">
                             <svg class="w-6 h-6 text-tumbas" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             <div>
-                                <p class="text-[9px] text-tumbas-400 uppercase tracking-widest leading-none mb-1">Area Operasional Pilihan</p>
+                                <p class="text-[9px] text-red-400 uppercase tracking-widest leading-none mb-1">Area Operasional Pilihan</p>
                                 <p class="text-base font-black text-gray-900">{{ $profile->selectedArea->name ?? '-' }}</p>
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                         @if($isAlumni || $isRejected || $isReapplying)
                             <form action="{{ route('rider.reapply') }}" method="POST" onsubmit="return confirm('Apakah Anda ingin mendaftar kembali sebagai rider?')">
                                 @csrf
-                                <button type="submit" class="inline-flex items-center gap-2 bg-tumbas-500 hover:bg-tumbas-600 text-white text-[10px] font-black px-6 py-2.5 rounded-full shadow-md transition-all hover:-translate-y-0.5 uppercase tracking-widest leading-none">
+                                <button type="submit" class="inline-flex items-center gap-2 bg-tumbas hover:bg-tumbas-dark text-white text-[10px] font-black px-6 py-2.5 rounded-full shadow-md transition-all hover:-translate-y-0.5 uppercase tracking-widest leading-none">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                     Daftar Kembali
                                 </button>
@@ -130,7 +130,7 @@
                                                 @if($isDone) 
                                                     Data formulir Anda telah resmi terdaftar di sistem.
                                                 @elseif($profile->employment_status === 'reapplying')
-                                                    <span class="text-tumbas-500 font-bold">Sedang memperbarui data pendaftaran ulang...</span>
+                                                    <span class="text-tumbas font-bold">Sedang memperbarui data pendaftaran ulang...</span>
                                                 @else
                                                     Data formulir pendaftaran Anda telah kami terima.
                                                 @endif
@@ -157,12 +157,12 @@
                                                             <div class="text-[11px] font-bold text-gray-700 leading-relaxed whitespace-pre-line">{{ $profile->interview_message }}</div>
                                                         </div>
 
-                                                        <div class="mt-6 flex flex-col gap-4">
+                                                        <div class="mt-6 flex flex-col gap-4" x-data="{ showDeclineForm: false, declineReason: '' }">
                                                             <div class="flex justify-between items-end">
                                                                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Konfirmasi Kehadiran Wawancara:</p>
                                                                 <p class="text-[9px] font-bold text-tumbas-400 uppercase tracking-tighter">Sisa Kesempatan: {{ max(0, 3 - $profile->interview_attendance_count) }}x</p>
                                                             </div>
-                                                            <div class="flex gap-4">
+                                                            <div class="flex flex-wrap gap-4" x-show="!showDeclineForm">
                                                                 <form action="{{ route('rider.interview.attendance') }}" method="POST" class="inline">
                                                                     @csrf
                                                                     <input type="hidden" name="attendance" value="hadir">
@@ -172,18 +172,61 @@
                                                                         Hadir
                                                                     </button>
                                                                 </form>
-                                                                <form action="{{ route('rider.interview.attendance') }}" method="POST" class="inline">
+                                                                <button type="button" @click="showDeclineForm = true"
+                                                                    {{ $profile->interview_attendance_count >= 3 ? 'disabled' : '' }}
+                                                                    class="px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all {{ $profile->effective_attendance === 'tidak_hadir' ? 'bg-red-500 text-white shadow-lg shadow-red-100' : 'bg-white border-2 border-red-500 text-red-600 hover:bg-red-50' }} {{ $profile->interview_attendance_count >= 3 ? 'opacity-50 cursor-not-allowed' : '' }}">
+                                                                    Tidak Hadir
+                                                                </button>
+                                                            </div>
+
+                                                            <div x-show="showDeclineForm" style="display: none;" x-transition class="bg-red-50 p-5 rounded-2xl border border-red-100 mt-2">
+                                                                <form action="{{ route('rider.interview.attendance') }}" method="POST" class="space-y-4">
                                                                     @csrf
                                                                     <input type="hidden" name="attendance" value="tidak_hadir">
-                                                                    <button type="submit" 
-                                                                        {{ $profile->interview_attendance_count >= 3 ? 'disabled' : '' }}
-                                                                        class="px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all {{ $profile->effective_attendance === 'tidak_hadir' ? 'bg-red-500 text-white shadow-lg shadow-red-100' : 'bg-white border-2 border-red-500 text-red-600 hover:bg-red-50' }} {{ $profile->interview_attendance_count >= 3 ? 'opacity-50 cursor-not-allowed' : '' }}">
-                                                                        Tidak Hadir
-                                                                    </button>
+                                                                    
+                                                                    <div>
+                                                                        <label class="block text-[10px] font-black text-red-800 uppercase mb-2">Alasan Tidak Hadir*</label>
+                                                                        <select name="decline_reason" x-model="declineReason" required class="w-full text-xs rounded-xl border-red-200 text-red-700 bg-white focus:ring-red-500 focus:border-red-500 py-2">
+                                                                            <option value="">-- Pilih Alasan --</option>
+                                                                            <option value="Perubahan Jadwal">Minta Perubahan Jadwal (Reschedule)</option>
+                                                                            <option value="Kepentingan Pribadi">Kepentingan Pribadi / Keluarga</option>
+                                                                            <option value="Sudah Diterima Kerja Lain">Sudah Diterima Kerja di Tempat Lain</option>
+                                                                            <option value="Lainnya">Alasan Lainnya</option>
+                                                                        </select>
+                                                                    </div>
+
+                                                                    <div x-show="declineReason === 'Perubahan Jadwal'" style="display: none;" x-transition>
+                                                                        <label class="block text-[10px] font-black text-red-800 uppercase mb-2">Usulan Tanggal Pengganti*</label>
+                                                                        <input type="date" name="reschedule_date" :required="declineReason === 'Perubahan Jadwal'" class="w-full text-xs rounded-xl border-red-200 text-red-700 bg-white focus:ring-red-500 focus:border-red-500 py-2">
+                                                                    </div>
+
+                                                                    <div x-show="declineReason && declineReason !== 'Perubahan Jadwal'" style="display: none;" x-transition>
+                                                                        <label class="block text-[10px] font-black text-red-800 uppercase mb-2">Detail Keterangan</label>
+                                                                        <textarea name="decline_details" rows="2" class="w-full text-xs rounded-xl border-red-200 text-red-700 bg-white focus:ring-red-500 focus:border-red-500 py-2" placeholder="Tuliskan alasan Anda secara detail di sini..."></textarea>
+                                                                    </div>
+
+                                                                    <div class="flex justify-end gap-3 pt-2">
+                                                                        <button type="button" @click="showDeclineForm = false; declineReason = ''" class="px-5 py-2 rounded-full text-xs font-bold text-red-500 hover:bg-red-100 transition-colors">Batal</button>
+                                                                        <button type="submit" class="px-5 py-2 rounded-full text-[10px] font-black uppercase text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-200 transition-transform hover:-translate-y-0.5">Kirim Konfirmasi</button>
+                                                                    </div>
                                                                 </form>
                                                             </div>
+
+                                                            @if($profile->effective_attendance === 'tidak_hadir' && $profile->interview_decline_reason)
+                                                                <div class="mt-2 p-4 bg-red-50 border border-red-100 rounded-2xl">
+                                                                    <p class="text-[9px] font-bold text-red-400 uppercase tracking-widest mb-1">Informasi Penolakan Anda:</p>
+                                                                    <p class="text-xs font-black text-red-700 mb-2">{{ $profile->interview_decline_reason }}</p>
+                                                                    @if($profile->interview_reschedule_date)
+                                                                        <p class="text-[10px] text-red-600 mb-1"><span class="font-bold opacity-75">Usulan Jadwal Baru:</span> {{ \Carbon\Carbon::parse($profile->interview_reschedule_date)->format('d F Y') }}</p>
+                                                                    @endif
+                                                                    @if($profile->interview_decline_details)
+                                                                        <p class="text-[10px] text-red-600 italic bg-white/50 p-2 rounded-lg mt-2">"{{ $profile->interview_decline_details }}"</p>
+                                                                    @endif
+                                                                </div>
+                                                            @endif
+
                                                             @if($profile->interview_attendance_count >= 3)
-                                                                <p class="text-[9px] text-red-500 font-bold italic">*Anda telah mencapai batas maksimal perubahan (3x).</p>
+                                                                <p class="text-[9px] text-red-500 font-bold italic mt-2">*Anda telah mencapai batas maksimal perubahan (3x).</p>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -264,4 +307,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
+

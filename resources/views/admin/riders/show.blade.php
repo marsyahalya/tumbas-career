@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layouts.app>
     <x-slot name="header">
         <div class="flex items-center gap-4">
             <a href="{{ route('admin.riders.index') }}" class="text-gray-400 hover:text-tumbas transition-colors">
@@ -215,9 +215,26 @@
                                         ✅ Hadir
                                     </span>
                                 @elseif($riderProfile->effective_attendance === 'tidak_hadir')
-                                    <span class="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-black rounded-full uppercase tracking-widest border border-red-200">
+                                    <span class="px-3 py-1 bg-red-100 text-red-700 text-[10px] font-black rounded-full uppercase tracking-widest border border-red-200 mb-2">
                                         ❌ Tidak Hadir
                                     </span>
+                                    @if($riderProfile->interview_decline_reason)
+                                        <div class="bg-red-50 p-2.5 rounded-xl border border-red-100 w-full text-center mt-1">
+                                            <p class="text-[9px] font-black text-red-400 uppercase tracking-widest">Alasan Penolakan</p>
+                                            <p class="text-[10px] font-bold text-red-700 leading-tight mb-1">{{ $riderProfile->interview_decline_reason }}</p>
+                                            
+                                            @if($riderProfile->interview_reschedule_date)
+                                                <p class="text-[9px] text-red-600 font-bold bg-white/60 py-1 px-2 rounded mt-1 border border-red-50">
+                                                    Usulan Reschedule:<br>
+                                                    {{ \Carbon\Carbon::parse($riderProfile->interview_reschedule_date)->format('d F Y') }}
+                                                </p>
+                                            @endif
+                                            
+                                            @if($riderProfile->interview_decline_details)
+                                                <p class="text-[9px] text-red-600 mt-1.5 italic leading-tight px-1">"{{ $riderProfile->interview_decline_details }}"</p>
+                                            @endif
+                                        </div>
+                                    @endif
                                 @else
                                     <span class="px-3 py-1 bg-stone-100 text-stone-500 text-[10px] font-black rounded-full uppercase tracking-widest border border-stone-200">
                                         ⏳ Belum Respon
@@ -361,4 +378,5 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
+

@@ -1,4 +1,4 @@
-<x-marketing-layout>
+<x-layouts.marketing>
     <x-marketing.navbar />
 
     <!-- Hero Section -->
@@ -198,4 +198,5 @@
     </section>
 
     <x-marketing.footer />
-</x-marketing-layout>
+</x-layouts.marketing>
+

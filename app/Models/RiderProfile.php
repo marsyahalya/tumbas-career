@@ -27,12 +27,16 @@ class RiderProfile extends Model
         'interview_sent_at',
         'interview_attendance_count',
         'interview_attendance_updated_at',
+        'interview_decline_reason',
+        'interview_reschedule_date',
+        'interview_decline_details',
     ];
 
     protected $casts = [
         'birth_date' => 'date',
         'interview_sent_at' => 'datetime',
         'interview_attendance_updated_at' => 'datetime',
+        'interview_reschedule_date' => 'date',
     ];
 
     const STATUS_LABELS = [

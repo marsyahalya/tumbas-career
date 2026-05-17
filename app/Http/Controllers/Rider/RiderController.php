@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Rider;
+
+use App\Http\Controllers\Controller;
 
 use App\Http\Requests\StoreRiderProfileRequest;
 use App\Http\Requests\UpdateRiderProfileRequest;
@@ -103,6 +105,12 @@ class RiderController extends Controller
     {
         $request->validate([
             'attendance' => 'required|in:hadir,tidak_hadir',
+            'decline_reason' => 'required_if:attendance,tidak_hadir|nullable|string',
+            'reschedule_date' => 'required_if:decline_reason,Perubahan Jadwal|nullable|date',
+            'decline_details' => 'nullable|string|max:1000',
+        ], [
+            'decline_reason.required_if' => 'Pilih alasan jika tidak dapat hadir.',
+            'reschedule_date.required_if' => 'Pilih tanggal usulan perubahan jadwal wawancara.',
         ]);
 
         $profile = auth()->user()->riderProfile;
@@ -112,7 +120,15 @@ class RiderController extends Controller
         }
 
         try {
-            $this->riderService->updateAttendance($profile, $request->attendance);
+            $declineData = [];
+            if ($request->attendance === 'tidak_hadir') {
+                $declineData = [
+                    'reason' => $request->decline_reason,
+                    'reschedule_date' => $request->reschedule_date,
+                    'details' => $request->decline_details,
+                ];
+            }
+            $this->riderService->updateAttendance($profile, $request->attendance, $declineData);
             return redirect()->back()->with('success', 'Konfirmasi kehadiran berhasil dikirim.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

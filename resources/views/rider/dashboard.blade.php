@@ -1,4 +1,4 @@
-<x-app-layout title="Beranda Rider">
+<x-layouts.app title="Beranda Rider">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Beranda Rider') }}
@@ -67,7 +67,7 @@
                                 @if($isAlumni || $isRejected || $isReapplying)
                                     <form action="{{ route('rider.reapply') }}" method="POST" class="inline">
                                         @csrf
-                                        <button type="submit" class="inline-flex items-center gap-3 bg-white border-2 border-tumbas-500 text-tumbas-600 px-8 py-3.5 rounded-full font-black text-xs hover:bg-tumbas-50 transition-all hover:-translate-y-1 uppercase tracking-widest">
+                                        <button type="submit" class="inline-flex items-center gap-3 bg-white border-2 border-tumbas text-tumbas-dark px-8 py-3.5 rounded-full font-black text-xs hover:bg-red-50 transition-all hover:-translate-y-1 uppercase tracking-widest">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                                             Daftar Kembali
                                         </button>
@@ -93,4 +93,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
+

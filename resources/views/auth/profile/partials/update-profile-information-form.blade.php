@@ -17,9 +17,9 @@
         @method('patch')
 
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
-            <x-input-error class="mt-2" :messages="$errors->get('email')" />
+            <x-forms.input-label for="email" :value="__('Email')" />
+            <x-forms.text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
+            <x-forms.input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
@@ -44,21 +44,21 @@
         @if($user->isRider() && $user->riderProfile)
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <x-input-label for="phone_number" :value="__('Nomor HP')" />
-                    <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->riderProfile->phone_number)" />
-                    <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
+                    <x-forms.input-label for="phone_number" :value="__('Nomor HP')" />
+                    <x-forms.text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->riderProfile->phone_number)" />
+                    <x-forms.input-error class="mt-2" :messages="$errors->get('phone_number')" />
                 </div>
                 <div>
-                     <x-input-label for="city" :value="__('Kota Domisili')" />
-                     <x-text-input id="city" name="city" type="text" class="mt-1 block w-full" :value="old('city', $user->riderProfile->city)" />
-                     <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                     <x-forms.input-label for="city" :value="__('Kota Domisili')" />
+                     <x-forms.text-input id="city" name="city" type="text" class="mt-1 block w-full" :value="old('city', $user->riderProfile->city)" />
+                     <x-forms.input-error class="mt-2" :messages="$errors->get('city')" />
                 </div>
             </div>
 
             <div>
-                <x-input-label for="address" :value="__('Alamat Lengkap')" />
+                <x-forms.input-label for="address" :value="__('Alamat Lengkap')" />
                 <textarea id="address" name="address" class="mt-1 block w-full border-gray-300 focus:border-tumbas focus:ring-tumbas rounded-md shadow-sm" rows="3">{{ old('address', $user->riderProfile->address) }}</textarea>
-                <x-input-error class="mt-2" :messages="$errors->get('address')" />
+                <x-forms.input-error class="mt-2" :messages="$errors->get('address')" />
             </div>
 
             {{-- Pendidikan --}}
@@ -66,24 +66,24 @@
                 <h4 class="text-xs font-bold text-stone-500 mb-4 uppercase tracking-widest">Informasi Pendidikan</h4>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <x-input-label for="education_level" :value="__('Jenjang Terakhir')" />
+                        <x-forms.input-label for="education_level" :value="__('Jenjang Terakhir')" />
                         <select id="education_level" name="education_level" class="mt-1 block w-full border-gray-300 focus:border-stone-500 focus:ring-stone-500 rounded-md shadow-sm text-sm">
                             <option value="">Pilih Jenjang</option>
                             @foreach(['SMA', 'SMK', 'D3', 'S1', 'S2'] as $level)
                                 <option value="{{ $level }}" {{ (old('education_level', $user->riderProfile->education_level) == $level) ? 'selected' : '' }}>{{ $level }}</option>
                             @endforeach
                         </select>
-                        <x-input-error class="mt-2" :messages="$errors->get('education_level')" />
+                        <x-forms.input-error class="mt-2" :messages="$errors->get('education_level')" />
                     </div>
                     <div>
-                        <x-input-label for="education_institution" :value="__('Institusi')" />
-                        <x-text-input id="education_institution" name="education_institution" type="text" class="mt-1 block w-full" :value="old('education_institution', $user->riderProfile->education_institution)" />
-                        <x-input-error class="mt-2" :messages="$errors->get('education_institution')" />
+                        <x-forms.input-label for="education_institution" :value="__('Institusi')" />
+                        <x-forms.text-input id="education_institution" name="education_institution" type="text" class="mt-1 block w-full" :value="old('education_institution', $user->riderProfile->education_institution)" />
+                        <x-forms.input-error class="mt-2" :messages="$errors->get('education_institution')" />
                     </div>
                     <div>
-                        <x-input-label for="graduation_year" :value="__('Thn Lulus')" />
-                        <x-text-input id="graduation_year" name="graduation_year" type="number" class="mt-1 block w-full" :value="old('graduation_year', $user->riderProfile->graduation_year)" min="1990" max="{{ date('Y') }}" />
-                        <x-input-error class="mt-2" :messages="$errors->get('graduation_year')" />
+                        <x-forms.input-label for="graduation_year" :value="__('Thn Lulus')" />
+                        <x-forms.text-input id="graduation_year" name="graduation_year" type="number" class="mt-1 block w-full" :value="old('graduation_year', $user->riderProfile->graduation_year)" min="1990" max="{{ date('Y') }}" />
+                        <x-forms.input-error class="mt-2" :messages="$errors->get('graduation_year')" />
                     </div>
                 </div>
             </div>
@@ -91,9 +91,9 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-stone-100">
                 <div class="space-y-4">
                     <div>
-                        <x-input-label for="cv" :value="__('Update CV (PDF)')" />
+                        <x-forms.input-label for="cv" :value="__('Update CV (PDF)')" />
                         <input id="cv" name="cv" type="file" class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-stone-50 file:text-stone-700 hover:file:bg-stone-100" accept=".pdf" />
-                        <x-input-error class="mt-2" :messages="$errors->get('cv')" />
+                        <x-forms.input-error class="mt-2" :messages="$errors->get('cv')" />
                     </div>
                     
                     @if($user->riderProfile->document && $user->riderProfile->document->cv_path)
@@ -106,9 +106,9 @@
 
                 <div class="space-y-4">
                     <div>
-                        <x-input-label for="photo" :value="__('Update Foto Diri')" />
+                        <x-forms.input-label for="photo" :value="__('Update Foto Diri')" />
                         <input id="photo" name="photo" type="file" class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-stone-50 file:text-stone-700 hover:file:bg-stone-100" accept="image/*" />
-                        <x-input-error class="mt-2" :messages="$errors->get('photo')" />
+                        <x-forms.input-error class="mt-2" :messages="$errors->get('photo')" />
                     </div>
                     
                     @if($user->riderProfile->document && $user->riderProfile->document->photo_path)
@@ -122,7 +122,7 @@
         @endif
 
         <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Simpan') }}</x-primary-button>
+            <x-buttons.primary-button>{{ __('Simpan') }}</x-buttons.primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p
@@ -136,3 +136,4 @@
         </div>
     </form>
 </section>
+

@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Document;
@@ -22,7 +24,7 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        return view('auth.profile.edit', [
             'user' => $request->user(),
         ]);
     }

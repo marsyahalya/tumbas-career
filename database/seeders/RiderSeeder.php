@@ -114,17 +114,29 @@ class RiderSeeder extends Seeder
                 'city' => 'Surakarta',
                 'address' => 'Jl. ' . $data['name'] . ' No. ' . rand(1, 100) . ', Jebres, Solo',
                 'selected_area_id' => $areas[array_rand($areas)],
-                'education_level' => ['SMA', 'D3', 'S1'][rand(0, 2)],
-                'education_institution' => 'Universitas ' . $data['name'],
-                'graduation_year' => rand(2015, 2023),
                 'application_status' => $data['application_status'],
-                'employment_status' => $data['employment_status'] ?? null,
                 'interview_message' => $data['interview_message'] ?? null,
-                'contract_start_date' => (isset($data['contract_days'])) ? now()->subMonths(1) : null,
-                'contract_end_date' => isset($data['contract_days']) ? now()->addDays($data['contract_days']) : null,
             ]);
 
-            // 3. Create Dummy Experience
+            // 3. Create Education
+            \App\Models\RiderEducation::create([
+                'rider_profile_id' => $profile->id,
+                'level' => ['SMA', 'D3', 'S1'][rand(0, 2)],
+                'institution' => 'Universitas ' . $data['name'],
+                'graduation_year' => rand(2015, 2023),
+            ]);
+
+            // 4. Create Contract if employment status is set
+            if (isset($data['employment_status'])) {
+                \App\Models\RiderContract::create([
+                    'rider_profile_id' => $profile->id,
+                    'status' => $data['employment_status'],
+                    'start_date' => (isset($data['contract_days'])) ? now()->subMonths(1) : null,
+                    'end_date' => isset($data['contract_days']) ? now()->addDays($data['contract_days']) : null,
+                ]);
+            }
+
+            // 5. Create Dummy Experience
             Experience::create([
                 'rider_profile_id' => $profile->id,
                 'company_name' => 'Layanan Antar ' . rand(1, 10),
@@ -133,7 +145,7 @@ class RiderSeeder extends Seeder
                 'end_date' => now()->subYears(1),
             ]);
 
-            // 4. Create Dummy Document
+            // 6. Create Dummy Document
             Document::create([
                 'rider_profile_id' => $profile->id,
                 'cv_path' => 'documents/cv/dummy-cv.pdf',
